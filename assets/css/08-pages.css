@@ -121,8 +121,10 @@
   padding: var(--space-3);
   display: grid;
   align-content: center;
+  justify-items: center;
   gap: var(--space-1);
   background: rgba(255,255,255,.04);
+  text-align: center;
 }
 
 .summary-item strong {
