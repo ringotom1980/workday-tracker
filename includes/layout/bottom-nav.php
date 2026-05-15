@@ -3,13 +3,13 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $navItems = [
     ['/work-log.php', html_entity_decode('&#32000;&#37636;', ENT_QUOTES, 'UTF-8'), 'log'],
     ['/work-stats.php', html_entity_decode('&#32113;&#35336;', ENT_QUOTES, 'UTF-8'), 'stats'],
-    ['/leaderboard.php', html_entity_decode('&#25490;&#34892;', ENT_QUOTES, 'UTF-8'), 'leaderboard'],
     ['/salary-bonus.php', html_entity_decode('&#34218;&#36039;', ENT_QUOTES, 'UTF-8'), 'salary'],
+    ['/leaderboard.php', html_entity_decode('&#25490;&#34892;', ENT_QUOTES, 'UTF-8'), 'leaderboard'],
     ['/profile.php', html_entity_decode('&#35373;&#23450;', ENT_QUOTES, 'UTF-8'), 'settings'],
 ];
 
 if (is_admin()) {
-    array_splice($navItems, 3, 0, [['/admin/index.php', html_entity_decode('&#24460;&#21488;', ENT_QUOTES, 'UTF-8'), 'admin']]);
+    array_splice($navItems, 4, 0, [['/admin/index.php', html_entity_decode('&#24460;&#21488;', ENT_QUOTES, 'UTF-8'), 'admin']]);
 }
 
 function nav_icon(string $name): string
