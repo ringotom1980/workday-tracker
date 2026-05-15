@@ -44,11 +44,41 @@ function normalize_calendar_date(string $rawDate): ?DateTime
     return $calendarDate instanceof DateTime ? $calendarDate : null;
 }
 
-try {
-    $csv = file_get_contents(GOVERNMENT_CALENDAR_CSV_URL);
-    if ($csv === false || trim($csv) === '') {
-        throw new RuntimeException('Cannot download government calendar CSV.');
+function download_calendar_csv(string $url): string
+{
+    $csv = @file_get_contents($url);
+    if (is_string($csv) && trim($csv) !== '') {
+        return $csv;
     }
+
+    if (!function_exists('curl_init')) {
+        throw new RuntimeException('Cannot download CSV. file_get_contents failed and cURL is not available.');
+    }
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_TIMEOUT => 60,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_USERAGENT => 'workday-tracker-calendar-sync/1.0',
+    ]);
+
+    $body = curl_exec($ch);
+    $error = curl_error($ch);
+    $statusCode = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+
+    if (!is_string($body) || trim($body) === '' || $statusCode >= 400) {
+        throw new RuntimeException(sprintf('Cannot download CSV. HTTP=%d Error=%s', $statusCode, $error ?: 'empty response'));
+    }
+
+    return $body;
+}
+
+try {
+    $csv = download_calendar_csv(GOVERNMENT_CALENDAR_CSV_URL);
 
     $handle = fopen('php://temp', 'r+');
     if ($handle === false) {
