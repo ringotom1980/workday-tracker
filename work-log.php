@@ -14,18 +14,35 @@ include __DIR__ . '/includes/layout/app-shell-start.php';
   <div class="card card-glow">
     <div class="card-header">
       <div>
-        <p class="text-muted">&#20170;&#26085;&#29376;&#24907;</p>
+        <p class="text-muted">&#36984;&#23450;&#26085;&#26399;</p>
         <h2 class="card-title" id="current-status">&#23578;&#26410;&#32000;&#37636;</h2>
       </div>
-      <span class="badge badge-primary" id="today-date"></span>
+      <button class="badge badge-primary date-picker-trigger" id="selected-date-button" type="button" aria-expanded="false" aria-controls="date-picker-panel"></button>
     </div>
     <div class="card-body stack">
+      <div class="date-picker-panel hidden" id="date-picker-panel">
+        <div class="date-picker-header">
+          <button class="icon-button" type="button" data-calendar-prev aria-label="&#19978;&#20491;&#26376;">&#8249;</button>
+          <strong class="date-picker-title" id="calendar-title"></strong>
+          <button class="icon-button" type="button" data-calendar-next aria-label="&#19979;&#20491;&#26376;">&#8250;</button>
+        </div>
+        <div class="date-picker-weekdays" aria-hidden="true">
+          <span>&#26085;</span>
+          <span>&#19968;</span>
+          <span>&#20108;</span>
+          <span>&#19977;</span>
+          <span>&#22235;</span>
+          <span>&#20116;</span>
+          <span>&#20845;</span>
+        </div>
+        <div class="date-picker-grid" id="date-picker-grid"></div>
+      </div>
       <div class="work-type-grid" role="group" aria-label="&#29677;&#21029;">
         <button class="btn btn-secondary btn-lg work-type-button" type="button" data-work-type="full_day">&#25972;&#26085;&#29677;</button>
         <button class="btn btn-secondary btn-lg work-type-button" type="button" data-work-type="half_day">&#21322;&#26085;&#29677;</button>
         <button class="btn btn-secondary btn-lg work-type-button" type="button" data-work-type="night">&#22812;&#29677;</button>
       </div>
-      <p class="text-muted" id="status-hint">&#40670;&#36984;&#29677;&#21029;&#21363;&#21487;&#32000;&#37636;&#20170;&#22825;&#65292;&#20877;&#40670;&#19968;&#27425;&#30456;&#21516;&#29677;&#21029;&#21487;&#21462;&#28040;&#12290;</p>
+      <p class="text-muted" id="status-hint">&#40670;&#36984;&#29677;&#21029;&#21363;&#21487;&#32000;&#37636;&#36984;&#23450;&#26085;&#26399;&#65292;&#20877;&#40670;&#19968;&#27425;&#30456;&#21516;&#29677;&#21029;&#21487;&#21462;&#28040;&#12290;</p>
     </div>
   </div>
 
