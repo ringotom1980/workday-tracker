@@ -317,9 +317,38 @@
   overflow-wrap: anywhere;
 }
 
+.admin-filter-row,
+.admin-user-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.admin-user-card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.admin-user-main {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.admin-user-main .cluster {
+  justify-content: flex-start;
+}
+
+.admin-user-actions .btn {
+  padding-inline: var(--space-2);
+}
+
 @media (max-width: 360px) {
   .admin-metric-grid,
   .admin-link-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-user-actions {
     grid-template-columns: 1fr;
   }
 }
