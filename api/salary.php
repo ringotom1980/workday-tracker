@@ -35,8 +35,11 @@ function month_work_total(int $userId, int $year, int $month): float
 
 function year_work_total(int $userId, int $year): float
 {
-    $start = sprintf('%04d-01-01', $year);
-    $end = sprintf('%04d-01-01', $year + 1);
+    return work_total_for_range($userId, sprintf('%04d-01-01', $year), sprintf('%04d-01-01', $year + 1));
+}
+
+function work_total_for_range(int $userId, string $start, string $end): float
+{
     $stmt = db()->prepare(
         'SELECT COALESCE(SUM(work_value), 0) AS total
          FROM work_logs
@@ -49,7 +52,7 @@ function year_work_total(int $userId, int $year): float
 function salary_settings(int $userId, int $year, int $month): array
 {
     $stmt = db()->prepare(
-        'SELECT daily_salary, bonus_base
+        'SELECT daily_salary
          FROM salary_settings
          WHERE user_id = ? AND year = ? AND month = ?
          LIMIT 1'
@@ -59,24 +62,46 @@ function salary_settings(int $userId, int $year, int $month): array
 
     return [
         'daily_salary' => (float) ($settings['daily_salary'] ?? 0),
-        'bonus_base' => (float) ($settings['bonus_base'] ?? 0),
+    ];
+}
+
+function bonus_settings(int $userId, int $year): array
+{
+    $stmt = db()->prepare(
+        'SELECT first_half_bonus_base, second_half_bonus_base
+         FROM salary_bonus_settings
+         WHERE user_id = ? AND year = ?
+         LIMIT 1'
+    );
+    $stmt->execute([$userId, $year]);
+    $settings = $stmt->fetch();
+
+    return [
+        'first_half_bonus_base' => (float) ($settings['first_half_bonus_base'] ?? 0),
+        'second_half_bonus_base' => (float) ($settings['second_half_bonus_base'] ?? 0),
     ];
 }
 
 function salary_payload(int $userId, int $year, int $month): array
 {
     $settings = salary_settings($userId, $year, $month);
+    $bonusSettings = bonus_settings($userId, $year);
     $monthlyWorkDays = month_work_total($userId, $year, $month);
     $yearlyWorkDays = year_work_total($userId, $year);
+    $firstHalfWorkDays = work_total_for_range($userId, sprintf('%04d-01-01', $year), sprintf('%04d-07-01', $year));
+    $secondHalfWorkDays = work_total_for_range($userId, sprintf('%04d-07-01', $year), sprintf('%04d-01-01', $year + 1));
 
     return [
         'year' => $year,
         'month' => $month,
-        'settings' => $settings,
+        'settings' => array_merge($settings, $bonusSettings),
         'monthly_work_days' => $monthlyWorkDays,
         'yearly_work_days' => $yearlyWorkDays,
+        'first_half_work_days' => $firstHalfWorkDays,
+        'second_half_work_days' => $secondHalfWorkDays,
         'monthly_salary' => $monthlyWorkDays * $settings['daily_salary'],
-        'yearly_bonus' => $yearlyWorkDays * $settings['bonus_base'],
+        'first_half_bonus' => $firstHalfWorkDays * $bonusSettings['first_half_bonus_base'],
+        'second_half_bonus' => $secondHalfWorkDays * $bonusSettings['second_half_bonus_base'],
     ];
 }
 
@@ -104,16 +129,25 @@ if ($action === 'settings' && $method === 'PUT') {
     }
 
     $dailySalary = max(0, (float) ($payload['daily_salary'] ?? 0));
-    $bonusBase = max(0, (float) ($payload['bonus_base'] ?? 0));
+    $firstHalfBonusBase = max(0, (float) ($payload['first_half_bonus_base'] ?? 0));
+    $secondHalfBonusBase = max(0, (float) ($payload['second_half_bonus_base'] ?? 0));
 
     $stmt = db()->prepare(
         'INSERT INTO salary_settings (user_id, year, month, daily_salary, bonus_base)
          VALUES (?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
-           daily_salary = VALUES(daily_salary),
-           bonus_base = VALUES(bonus_base)'
+           daily_salary = VALUES(daily_salary)'
     );
-    $stmt->execute([$userId, $year, $month, $dailySalary, $bonusBase]);
+    $stmt->execute([$userId, $year, $month, $dailySalary, 0]);
+
+    $bonusStmt = db()->prepare(
+        'INSERT INTO salary_bonus_settings (user_id, year, first_half_bonus_base, second_half_bonus_base)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+           first_half_bonus_base = VALUES(first_half_bonus_base),
+           second_half_bonus_base = VALUES(second_half_bonus_base)'
+    );
+    $bonusStmt->execute([$userId, $year, $firstHalfBonusBase, $secondHalfBonusBase]);
 
     json_success(salary_payload($userId, $year, $month), html_entity_decode('&#24050;&#20786;&#23384;', ENT_QUOTES, 'UTF-8'));
 }
@@ -141,8 +175,10 @@ if ($action === 'yearly_bonus' && $method === 'GET') {
     $month = (int) ($_GET['month'] ?? date('n'));
     $payload = salary_payload($userId, $year, max(1, min(12, $month)));
     json_success([
-        'yearly_work_days' => $payload['yearly_work_days'],
-        'yearly_bonus' => $payload['yearly_bonus'],
+        'first_half_work_days' => $payload['first_half_work_days'],
+        'second_half_work_days' => $payload['second_half_work_days'],
+        'first_half_bonus' => $payload['first_half_bonus'],
+        'second_half_bonus' => $payload['second_half_bonus'],
     ]);
 }
 

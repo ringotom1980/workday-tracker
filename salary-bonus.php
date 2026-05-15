@@ -47,8 +47,12 @@ include __DIR__ . '/includes/layout/app-shell-start.php';
         <input class="form-control" id="daily-salary" type="number" min="0" step="1" inputmode="decimal" placeholder="0">
       </div>
       <div class="form-group">
-        <label class="form-label" for="bonus-base">&#32005;&#21033;&#22522;&#25976;</label>
-        <input class="form-control" id="bonus-base" type="number" min="0" step="1" inputmode="decimal" placeholder="0">
+        <label class="form-label" for="first-half-bonus-base">&#19978;&#21322;&#24180;&#32005;&#21033;&#22522;&#25976;</label>
+        <input class="form-control" id="first-half-bonus-base" type="number" min="0" step="1" inputmode="decimal" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="second-half-bonus-base">&#19979;&#21322;&#24180;&#32005;&#21033;&#22522;&#25976;</label>
+        <input class="form-control" id="second-half-bonus-base" type="number" min="0" step="1" inputmode="decimal" placeholder="0">
       </div>
       <p class="text-muted">&#20572;&#27490;&#36664;&#20837; 1 &#31186;&#24460;&#33258;&#21205;&#20786;&#23384;&#12290;</p>
     </div>
@@ -64,12 +68,20 @@ include __DIR__ . '/includes/layout/app-shell-start.php';
       <strong>$<span class="number" id="monthly-salary">0</span></strong>
     </div>
     <div class="card salary-result-card">
-      <p class="text-muted">&#24180;&#24230;&#19978;&#29677;&#22825;&#25976;</p>
-      <strong><span class="number" id="yearly-work-days">0</span> &#22825;</strong>
+      <p class="text-muted">&#19978;&#21322;&#24180;&#24037;&#25976;</p>
+      <strong><span class="number" id="first-half-work-days">0</span> &#22825;</strong>
     </div>
     <div class="card salary-result-card">
-      <p class="text-muted">&#24180;&#24230;&#32005;&#21033;&#27010;&#20272;</p>
-      <strong>$<span class="number" id="yearly-bonus">0</span></strong>
+      <p class="text-muted">&#19978;&#21322;&#24180;&#32005;&#21033;</p>
+      <strong>$<span class="number" id="first-half-bonus">0</span></strong>
+    </div>
+    <div class="card salary-result-card">
+      <p class="text-muted">&#19979;&#21322;&#24180;&#24037;&#25976;</p>
+      <strong><span class="number" id="second-half-work-days">0</span> &#22825;</strong>
+    </div>
+    <div class="card salary-result-card">
+      <p class="text-muted">&#19979;&#21322;&#24180;&#32005;&#21033;</p>
+      <strong>$<span class="number" id="second-half-bonus">0</span></strong>
     </div>
   </div>
 </section>

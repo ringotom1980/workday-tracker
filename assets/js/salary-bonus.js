@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const monthTitle = document.querySelector('#salary-month-title');
   const saveStatus = document.querySelector('#save-status');
   const dailySalaryInput = document.querySelector('#daily-salary');
-  const bonusBaseInput = document.querySelector('#bonus-base');
+  const firstHalfBonusBaseInput = document.querySelector('#first-half-bonus-base');
+  const secondHalfBonusBaseInput = document.querySelector('#second-half-bonus-base');
   const now = new Date();
   let currentYear = now.getFullYear();
   let currentMonth = now.getMonth() + 1;
@@ -30,13 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (updateInputs) {
       dailySalaryInput.value = Number(data.settings.daily_salary || 0) || '';
-      bonusBaseInput.value = Number(data.settings.bonus_base || 0) || '';
+      firstHalfBonusBaseInput.value = Number(data.settings.first_half_bonus_base || 0) || '';
+      secondHalfBonusBaseInput.value = Number(data.settings.second_half_bonus_base || 0) || '';
     }
 
     document.querySelector('#monthly-work-days').textContent = Number(data.monthly_work_days).toFixed(1);
-    document.querySelector('#yearly-work-days').textContent = Number(data.yearly_work_days).toFixed(1);
+    document.querySelector('#first-half-work-days').textContent = Number(data.first_half_work_days).toFixed(1);
+    document.querySelector('#second-half-work-days').textContent = Number(data.second_half_work_days).toFixed(1);
     document.querySelector('#monthly-salary').textContent = money(data.monthly_salary);
-    document.querySelector('#yearly-bonus').textContent = money(data.yearly_bonus);
+    document.querySelector('#first-half-bonus').textContent = money(data.first_half_bonus);
+    document.querySelector('#second-half-bonus').textContent = money(data.second_half_bonus);
   }
 
   async function loadData() {
@@ -67,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
         year: currentYear,
         month: currentMonth,
         daily_salary: Number(dailySalaryInput.value || 0),
-        bonus_base: Number(bonusBaseInput.value || 0),
+        first_half_bonus_base: Number(firstHalfBonusBaseInput.value || 0),
+        second_half_bonus_base: Number(secondHalfBonusBaseInput.value || 0),
         csrf_token: token,
       });
 
@@ -81,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const debouncedSave = FormUtil.debounce(saveSettings, 1000);
 
-  [dailySalaryInput, bonusBaseInput].forEach((input) => {
+  [dailySalaryInput, firstHalfBonusBaseInput, secondHalfBonusBaseInput].forEach((input) => {
     input.addEventListener('input', () => {
       setStatus('\u31561\u79d2\u81ea\u52d5\u5132\u5b58', 'warning');
       debouncedSave();
