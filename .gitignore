@@ -1,0 +1,9 @@
+.env
+/includes/config-local.php
+/logs/*
+!/logs/.gitkeep
+/cache/
+/uploads/temp/
+.vscode/
+.DS_Store
+Thumbs.db
