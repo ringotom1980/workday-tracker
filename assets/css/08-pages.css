@@ -130,3 +130,108 @@
 .summary-item strong {
   font-size: var(--text-xl);
 }
+
+.stats-toolbar {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.stats-weekdays,
+.stats-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.stats-weekdays {
+  margin-bottom: 6px;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.stats-calendar-empty {
+  min-height: 76px;
+}
+
+.stats-calendar-day {
+  min-height: 76px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 5px;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  justify-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,.04);
+  text-align: center;
+  overflow: hidden;
+}
+
+.stats-calendar-day strong {
+  font-size: var(--text-md);
+  line-height: 1;
+}
+
+.stats-calendar-day small {
+  width: 100%;
+  color: var(--color-muted);
+  font-size: 10px;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-calendar-day.is-today {
+  border-color: rgba(56,189,248,.85);
+}
+
+.stats-calendar-day.has-record {
+  border-color: rgba(50,213,131,.9);
+  box-shadow: inset 0 0 0 1px rgba(50,213,131,.28);
+}
+
+.stats-calendar-day.is-holiday {
+  background: rgba(255,77,109,.08);
+}
+
+.stats-calendar-day.is-makeup {
+  background: rgba(255,176,32,.08);
+}
+
+.calendar-chip-row {
+  min-height: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.calendar-chip {
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.calendar-chip-work {
+  color: #06120B;
+  background: var(--color-success);
+}
+
+.calendar-chip-holiday {
+  color: var(--color-text);
+  background: var(--color-danger);
+}
+
+.calendar-chip-makeup {
+  color: #1A1000;
+  background: var(--color-warning);
+}
