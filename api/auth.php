@@ -41,7 +41,7 @@ if ($action === 'logout') {
     $payload = input_json();
     $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $payload['csrf_token'] ?? null;
     if (!verify_csrf($token)) {
-        json_error('CSRF 驗證失敗', 419);
+        json_error('CSRF verification failed.', 419);
     }
 
     $_SESSION = [];
@@ -51,7 +51,7 @@ if ($action === 'logout') {
     }
     session_destroy();
 
-    json_success([], '已登出');
+    json_success([], html_entity_decode('&#24050;&#30331;&#20986;', ENT_QUOTES, 'UTF-8'));
 }
 
 if ($action !== 'login') {
@@ -66,14 +66,14 @@ $payload = input_json();
 $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $payload['csrf_token'] ?? null;
 
 if (!verify_csrf($token)) {
-    json_error('CSRF 驗證失敗', 419);
+    json_error('CSRF verification failed.', 419);
 }
 
 $identifier = trim((string) ($payload['identifier'] ?? ''));
 $password = (string) ($payload['password'] ?? '');
 
 if ($identifier === '' || $password === '') {
-    json_error('請輸入帳號與密碼');
+    json_error(html_entity_decode('&#35531;&#36664;&#20837;&#24115;&#34399;&#33287;&#23494;&#30908;', ENT_QUOTES, 'UTF-8'));
 }
 
 $stmt = db()->prepare(
@@ -86,20 +86,20 @@ $stmt->execute([$identifier, $identifier]);
 $user = $stmt->fetch();
 
 if (!$user || !password_verify($password, $user['password_hash'])) {
-    login_log(isset($user['id']) ? (int) $user['id'] : null, $user['email'] ?? $identifier, false, '帳號或密碼錯誤');
-    json_error('帳號或密碼錯誤', 401);
+    login_log(isset($user['id']) ? (int) $user['id'] : null, $user['email'] ?? $identifier, false, 'Invalid credentials');
+    json_error(html_entity_decode('&#24115;&#34399;&#25110;&#23494;&#30908;&#37679;&#35492;', ENT_QUOTES, 'UTF-8'), 401);
 }
 
 if ($user['status'] !== 'active') {
-    login_log((int) $user['id'], $user['email'], false, '帳號已停用');
-    json_error('帳號已停用', 403);
+    login_log((int) $user['id'], $user['email'], false, 'Account disabled');
+    json_error(html_entity_decode('&#24115;&#34399;&#24050;&#20572;&#29992;', ENT_QUOTES, 'UTF-8'), 403);
 }
 
 session_regenerate_id(true);
 $_SESSION['user_id'] = (int) $user['id'];
 
 db()->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([(int) $user['id']]);
-login_log((int) $user['id'], $user['email'], true, '登入成功');
+login_log((int) $user['id'], $user['email'], true, 'Login success');
 
 json_success([
     'redirect' => '/work-log.php',
@@ -110,4 +110,4 @@ json_success([
         'email' => $user['email'],
         'role' => $user['role'],
     ],
-], '登入成功');
+], html_entity_decode('&#30331;&#20837;&#25104;&#21151;', ENT_QUOTES, 'UTF-8'));
