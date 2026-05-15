@@ -24,3 +24,24 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-2);
 }
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.summary-item {
+  min-height: 74px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  display: grid;
+  align-content: center;
+  gap: var(--space-1);
+  background: rgba(255,255,255,.04);
+}
+
+.summary-item strong {
+  font-size: var(--text-xl);
+}
