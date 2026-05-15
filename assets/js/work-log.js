@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentLog = null;
 
   const labels = {
-    full_day: 'Full day',
-    half_day: 'Half day',
-    night: 'Night shift',
+    full_day: '\u6574\u65e5\u73ed',
+    half_day: '\u534a\u65e5\u73ed',
+    night: '\u591c\u73ed',
   };
 
   function setBusy(isBusy) {
@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!log) {
-      status.textContent = 'Not recorded yet';
-      statusHint.textContent = 'Tap a shift type to record today. Tap the same type again to cancel.';
+      status.textContent = '\u5c1a\u672a\u7d00\u9304';
+      statusHint.textContent = '\u9ede\u9078\u73ed\u5225\u5373\u53ef\u7d00\u9304\u4eca\u5929\uff0c\u518d\u9ede\u4e00\u6b21\u76f8\u540c\u73ed\u5225\u53ef\u53d6\u6d88\u3002';
       return;
     }
 
-    status.textContent = labels[log.work_type] || 'Recorded';
-    statusHint.textContent = `${Number(log.work_value).toFixed(1)} day counted for today.`;
+    status.textContent = labels[log.work_type] || '\u5df2\u7d00\u9304';
+    statusHint.textContent = `\u4eca\u5929\u63db\u7b97 ${Number(log.work_value).toFixed(1)} \u5929\u3002`;
   }
 
   function updateSummary(data) {
@@ -72,19 +72,19 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       if (currentLog?.work_type === workType) {
         await Api.delete(`/api/work-logs.php?date=${today}&csrf_token=${encodeURIComponent(token)}`);
-        UI.toast('Record cancelled', 'info');
+        UI.toast('\u5df2\u53d6\u6d88\u7d00\u9304', 'info');
       } else {
         await Api.put('/api/work-logs.php', {
           date: today,
           work_type: workType,
           csrf_token: token,
         });
-        UI.toast('Record saved', 'success');
+        UI.toast('\u5df2\u5132\u5b58\u7d00\u9304', 'success');
       }
 
       await loadData();
     } catch (error) {
-      UI.toast(error.message || 'Update failed', 'danger');
+      UI.toast(error.message || '\u66f4\u65b0\u5931\u6557', 'danger');
     } finally {
       setBusy(false);
     }
@@ -95,6 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   loadData().catch((error) => {
-    UI.toast(error.message || 'Load failed', 'danger');
+    UI.toast(error.message || '\u8f09\u5165\u5931\u6557', 'danger');
   });
 });
