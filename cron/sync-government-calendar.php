@@ -9,19 +9,58 @@ $recordsProcessed = 0;
 $status = 'failed';
 $message = null;
 
+function text_entity(string $value): string
+{
+    return html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+}
+
+function csv_value(array $record, array $keys): ?string
+{
+    foreach ($keys as $key) {
+        if (array_key_exists($key, $record) && trim((string) $record[$key]) !== '') {
+            return trim((string) $record[$key]);
+        }
+    }
+
+    return null;
+}
+
+function normalize_calendar_date(string $rawDate): ?DateTime
+{
+    $date = preg_replace('/[^0-9]/', '', $rawDate);
+    if (!is_string($date) || $date === '') {
+        return null;
+    }
+
+    if (strlen($date) === 7) {
+        $date = ((int) substr($date, 0, 3) + 1911) . substr($date, 3);
+    }
+
+    if (strlen($date) !== 8) {
+        return null;
+    }
+
+    $calendarDate = DateTime::createFromFormat('Ymd', $date);
+    return $calendarDate instanceof DateTime ? $calendarDate : null;
+}
+
 try {
     $csv = file_get_contents(GOVERNMENT_CALENDAR_CSV_URL);
     if ($csv === false || trim($csv) === '') {
-        throw new RuntimeException('無法下載政府行事曆 CSV');
+        throw new RuntimeException('Cannot download government calendar CSV.');
     }
 
     $handle = fopen('php://temp', 'r+');
+    if ($handle === false) {
+        throw new RuntimeException('Cannot open temporary CSV stream.');
+    }
+
     fwrite($handle, $csv);
     rewind($handle);
 
     $headers = fgetcsv($handle);
     if ($headers === false) {
-        throw new RuntimeException('CSV 格式錯誤');
+        throw new RuntimeException('Invalid CSV header.');
     }
 
     $pdo = db();
@@ -43,32 +82,38 @@ try {
           source_updated_at = VALUES(source_updated_at)'
     );
 
+    $dateKeys = ['date', 'Date', text_entity('&#35199;&#20803;&#26085;&#26399;'), text_entity('&#26085;&#26399;')];
+    $holidayKeys = ['isHoliday', 'IsHoliday', 'isholiday', text_entity('&#26159;&#21542;&#25918;&#20551;')];
+    $descriptionKeys = ['description', 'Description', text_entity('&#20633;&#35387;'), text_entity('&#35498;&#26126;')];
+    $titleKeys = ['name', 'Name', 'title', 'Title', text_entity('&#31680;&#26085;&#21517;&#31281;'), text_entity('&#20551;&#26085;&#21517;&#31281;')];
+    $yesText = text_entity('&#26159;');
+    $holidayTextMatch = text_entity('&#25918;&#20551;');
+    $makeupWorkdayText = text_entity('&#35036;&#34892;&#19978;&#29677;');
+    $makeupText = text_entity('&#35036;&#29677;');
+    $sourceName = text_entity('&#26032;&#21271;&#24066;&#25919;&#24220;&#36039;&#26009;&#38283;&#25918;&#24179;&#33274;');
+
     while (($row = fgetcsv($handle)) !== false) {
         $record = array_combine($headers, $row);
         if (!is_array($record)) {
             continue;
         }
 
-        $rawDate = $record['date'] ?? $record['西元日期'] ?? $record['日期'] ?? null;
-        if (!$rawDate) {
+        $rawDate = csv_value($record, $dateKeys);
+        if ($rawDate === null) {
             continue;
         }
 
-        $date = preg_replace('/[^0-9]/', '', (string) $rawDate);
-        if (strlen($date) === 7) {
-            $date = ((int) substr($date, 0, 3) + 1911) . substr($date, 3);
-        }
-
-        $calendarDate = DateTime::createFromFormat('Ymd', $date);
+        $calendarDate = normalize_calendar_date($rawDate);
         if (!$calendarDate) {
             continue;
         }
 
-        $holidayText = (string) ($record['isHoliday'] ?? $record['是否放假'] ?? '');
-        $description = (string) ($record['description'] ?? $record['備註'] ?? '');
-        $title = (string) ($record['name'] ?? $record['節日名稱'] ?? $record['假日名稱'] ?? '');
-        $isHoliday = in_array($holidayText, ['1', '是', '放假'], true) || str_contains($description, '放假');
-        $isMakeupWorkday = str_contains($description, '補行上班') || str_contains($description, '補班');
+        $holidayText = csv_value($record, $holidayKeys) ?? '';
+        $description = csv_value($record, $descriptionKeys) ?? '';
+        $title = csv_value($record, $titleKeys) ?? '';
+
+        $isHoliday = in_array($holidayText, ['1', $yesText, $holidayTextMatch], true) || str_contains($description, $holidayTextMatch);
+        $isMakeupWorkday = str_contains($description, $makeupWorkdayText) || str_contains($description, $makeupText);
 
         $stmt->execute([
             ':calendar_date' => $calendarDate->format('Y-m-d'),
@@ -78,7 +123,7 @@ try {
             ':is_holiday' => $isHoliday ? 1 : 0,
             ':is_makeup_workday' => $isMakeupWorkday ? 1 : 0,
             ':source_type' => 'csv',
-            ':source_name' => '新北市政府資料開放平臺',
+            ':source_name' => $sourceName,
             ':title' => $title !== '' ? $title : null,
             ':description' => $description !== '' ? $description : null,
             ':source_url' => GOVERNMENT_CALENDAR_CSV_URL,
@@ -91,7 +136,7 @@ try {
     fclose($handle);
     $pdo->commit();
     $status = 'success';
-    $message = '同步完成';
+    $message = 'Sync completed.';
 } catch (Throwable $exception) {
     if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
@@ -116,4 +161,4 @@ try {
     }
 }
 
-echo sprintf("[%s] %s, records=%d\n", $status, $message, $recordsProcessed);
+echo sprintf("[%s] %s records=%d\n", $status, $message, $recordsProcessed);

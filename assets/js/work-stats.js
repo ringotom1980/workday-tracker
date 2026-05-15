@@ -24,13 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
       .replaceAll("'", '&#039;');
   }
 
-  function renderSummary(stats, holidays) {
+  function renderSummary(stats) {
     document.querySelector('#stats-total').textContent = Number(stats.summary.total_value).toFixed(1);
     document.querySelector('#stats-record-count').textContent = `${stats.summary.record_count} \u7b46`;
     document.querySelector('#stats-full').textContent = stats.summary.full_day;
     document.querySelector('#stats-half').textContent = stats.summary.half_day;
     document.querySelector('#stats-night').textContent = stats.summary.night;
-    document.querySelector('#stats-holiday').textContent = holidays.filter((day) => Number(day.is_holiday) === 1).length;
   }
 
   function renderCalendar(stats, calendar) {
@@ -90,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Api.get(`/api/calendar.php?year=${currentYear}&month=${currentMonth}`),
       ]);
 
-      renderSummary(stats, calendar.days);
+      renderSummary(stats);
       renderCalendar(stats, calendar);
     } catch (error) {
       UI.toast(error.message || '\u8f09\u5165\u5931\u6557', 'danger');

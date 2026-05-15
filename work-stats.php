@@ -43,10 +43,6 @@ include __DIR__ . '/includes/layout/app-shell-start.php';
           <span class="text-muted">&#22812;&#29677;</span>
           <strong class="number" id="stats-night">0</strong>
         </div>
-        <div class="summary-item">
-          <span class="text-muted">&#20551;&#26085;</span>
-          <strong class="number" id="stats-holiday">0</strong>
-        </div>
       </div>
     </div>
   </div>
