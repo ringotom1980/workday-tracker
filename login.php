@@ -49,6 +49,17 @@ if (is_logged_in()) {
             <p class="form-error" data-error-for="password"></p>
           </div>
 
+          <div class="auth-options">
+            <label class="check-option" for="remember-account">
+              <input id="remember-account" name="remember_account" type="checkbox">
+              <span>&#35352;&#20303;&#24115;&#34399;</span>
+            </label>
+            <label class="check-option" for="remember-password">
+              <input id="remember-password" name="remember_password" type="checkbox">
+              <span>&#35352;&#20303;&#23494;&#30908;</span>
+            </label>
+          </div>
+
           <button class="btn btn-primary btn-lg btn-block" type="submit">&#30331;&#20837;</button>
         </form>
 
