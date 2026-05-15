@@ -32,3 +32,12 @@ function work_value_for_type(string $workType): float
         default => 0.0,
     };
 }
+
+function first_character(string $value): string
+{
+    if (preg_match('/./u', $value, $matches) === 1) {
+        return $matches[0];
+    }
+
+    return substr($value, 0, 1);
+}

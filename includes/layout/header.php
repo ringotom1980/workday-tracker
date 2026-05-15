@@ -6,7 +6,7 @@
     </button>
     <h1 class="app-header-title"><?= e($pageTitle ?? APP_NAME) ?></h1>
     <a class="avatar-button" href="/profile.php" aria-label="個人設定">
-      <?= e(mb_substr($user['real_name'] ?? '我', 0, 1, 'UTF-8')) ?>
+      <?= e(first_character($user['real_name'] ?? '我')) ?>
     </a>
   </div>
 </header>
