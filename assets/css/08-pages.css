@@ -280,3 +280,46 @@
   font-size: var(--text-xl);
   font-weight: 900;
 }
+
+.admin-metric-grid,
+.admin-link-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.admin-metric-card {
+  min-height: 104px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.admin-metric-card strong {
+  font-size: var(--text-xxl);
+  line-height: 1;
+}
+
+.admin-info-row {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-info-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-info-row strong {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 360px) {
+  .admin-metric-grid,
+  .admin-link-grid {
+    grid-template-columns: 1fr;
+  }
+}
