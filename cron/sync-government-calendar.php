@@ -25,6 +25,30 @@ function csv_value(array $record, array $keys): ?string
     return null;
 }
 
+function normalize_text(string $value): string
+{
+    $value = preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
+    return trim($value);
+}
+
+function text_contains(string $haystack, string $needle): bool
+{
+    return $needle !== '' && strpos($haystack, $needle) !== false;
+}
+
+function normalize_csv(string $csv): string
+{
+    $sample = substr($csv, 0, 4096);
+    if (function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding')) {
+        $encoding = mb_detect_encoding($sample, ['UTF-8', 'BIG5', 'CP950', 'ISO-8859-1'], true);
+        if ($encoding && strtoupper($encoding) !== 'UTF-8') {
+            return mb_convert_encoding($csv, 'UTF-8', $encoding);
+        }
+    }
+
+    return $csv;
+}
+
 function normalize_calendar_date(string $rawDate): ?DateTime
 {
     $date = preg_replace('/[^0-9]/', '', $rawDate);
@@ -42,6 +66,18 @@ function normalize_calendar_date(string $rawDate): ?DateTime
 
     $calendarDate = DateTime::createFromFormat('Ymd', $date);
     return $calendarDate instanceof DateTime ? $calendarDate : null;
+}
+
+function detect_row_date(array $record): ?DateTime
+{
+    foreach ($record as $value) {
+        $date = normalize_calendar_date((string) $value);
+        if ($date instanceof DateTime) {
+            return $date;
+        }
+    }
+
+    return null;
 }
 
 function download_calendar_csv(string $url): string
@@ -78,7 +114,7 @@ function download_calendar_csv(string $url): string
 }
 
 try {
-    $csv = download_calendar_csv(GOVERNMENT_CALENDAR_CSV_URL);
+    $csv = normalize_csv(download_calendar_csv(GOVERNMENT_CALENDAR_CSV_URL));
 
     $handle = fopen('php://temp', 'r+');
     if ($handle === false) {
@@ -92,6 +128,9 @@ try {
     if ($headers === false) {
         throw new RuntimeException('Invalid CSV header.');
     }
+    $headers = array_map(static function ($header): string {
+        return normalize_text((string) $header);
+    }, $headers);
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -113,7 +152,8 @@ try {
     );
 
     $dateKeys = ['date', 'Date', text_entity('&#35199;&#20803;&#26085;&#26399;'), text_entity('&#26085;&#26399;')];
-    $holidayKeys = ['isHoliday', 'IsHoliday', 'isholiday', text_entity('&#26159;&#21542;&#25918;&#20551;')];
+    $holidayKeys = ['isholiday', 'isHoliday', 'IsHoliday', 'ISHOLIDAY', text_entity('&#26159;&#21542;&#25918;&#20551;')];
+    $holidayCategoryKeys = ['holidaycategory', 'holidayCategory', 'HolidayCategory', text_entity('&#21608;&#26411;&#20551;&#26399;&#31561;')];
     $descriptionKeys = ['description', 'Description', text_entity('&#20633;&#35387;'), text_entity('&#35498;&#26126;')];
     $titleKeys = ['name', 'Name', 'title', 'Title', text_entity('&#31680;&#26085;&#21517;&#31281;'), text_entity('&#20551;&#26085;&#21517;&#31281;')];
     $yesText = text_entity('&#26159;');
@@ -123,27 +163,33 @@ try {
     $sourceName = text_entity('&#26032;&#21271;&#24066;&#25919;&#24220;&#36039;&#26009;&#38283;&#25918;&#24179;&#33274;');
 
     while (($row = fgetcsv($handle)) !== false) {
+        $row = array_map(static function ($value): string {
+            return normalize_text((string) $value);
+        }, $row);
         $record = array_combine($headers, $row);
         if (!is_array($record)) {
             continue;
         }
 
         $rawDate = csv_value($record, $dateKeys);
-        if ($rawDate === null) {
-            continue;
-        }
-
-        $calendarDate = normalize_calendar_date($rawDate);
+        $calendarDate = $rawDate !== null ? normalize_calendar_date($rawDate) : detect_row_date($record);
         if (!$calendarDate) {
             continue;
         }
 
         $holidayText = csv_value($record, $holidayKeys) ?? '';
+        $holidayCategory = csv_value($record, $holidayCategoryKeys) ?? '';
         $description = csv_value($record, $descriptionKeys) ?? '';
         $title = csv_value($record, $titleKeys) ?? '';
 
-        $isHoliday = in_array($holidayText, ['1', $yesText, $holidayTextMatch], true) || str_contains($description, $holidayTextMatch);
-        $isMakeupWorkday = str_contains($description, $makeupWorkdayText) || str_contains($description, $makeupText);
+        $isHoliday = in_array($holidayText, ['1', $yesText, $holidayTextMatch], true)
+            || in_array($holidayCategory, ['1', $yesText, $holidayTextMatch], true)
+            || text_contains($holidayCategory, $holidayTextMatch)
+            || text_contains($description, $holidayTextMatch);
+        $isMakeupWorkday = text_contains($description, $makeupWorkdayText)
+            || text_contains($description, $makeupText)
+            || text_contains($holidayCategory, $makeupWorkdayText)
+            || text_contains($holidayCategory, $makeupText);
 
         $stmt->execute([
             ':calendar_date' => $calendarDate->format('Y-m-d'),
@@ -166,7 +212,9 @@ try {
     fclose($handle);
     $pdo->commit();
     $status = 'success';
-    $message = 'Sync completed.';
+    $message = $recordsProcessed > 0
+        ? 'Sync completed.'
+        : 'Sync completed but no records were imported. Headers: ' . implode(', ', array_slice($headers, 0, 12));
 } catch (Throwable $exception) {
     if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
