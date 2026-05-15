@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  function toggleCalendar(show = !panel.classList.contains('hidden')) {
+  function toggleCalendar(show = panel.classList.contains('hidden')) {
     panel.classList.toggle('hidden', !show);
     selectedDateButton.setAttribute('aria-expanded', String(show));
   }
