@@ -25,12 +25,16 @@ function input_json(): array
 
 function work_value_for_type(string $workType): float
 {
-    return match ($workType) {
-        'full_day' => 1.0,
-        'half_day' => 0.5,
-        'night' => 1.5,
-        default => 0.0,
-    };
+    switch ($workType) {
+        case 'full_day':
+            return 1.0;
+        case 'half_day':
+            return 0.5;
+        case 'night':
+            return 1.5;
+        default:
+            return 0.0;
+    }
 }
 
 function first_character(string $value): string
