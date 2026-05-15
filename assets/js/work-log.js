@@ -13,11 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedDate = DateUtil.today();
   let calendarDate = parseDate(selectedDate);
   let currentLog = null;
+  let monthLogs = new Map();
 
   const labels = {
     full_day: '\u6574\u65e5\u73ed',
     half_day: '\u534a\u65e5\u73ed',
     night: '\u591c\u73ed',
+  };
+
+  const shortLabels = {
+    full_day: '\u6574',
+    half_day: '\u534a',
+    night: '\u591c',
   };
 
   function parseDate(value) {
@@ -73,12 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateValue = formatDate(new Date(year, month, day));
       const button = document.createElement('button');
+      const recordedLog = monthLogs.get(dateValue);
       button.type = 'button';
       button.className = 'date-picker-day';
-      button.textContent = String(day);
       button.dataset.date = dateValue;
       button.classList.toggle('is-selected', dateValue === selectedDate);
       button.classList.toggle('is-today', dateValue === today);
+      button.classList.toggle('has-record', Boolean(recordedLog));
+      button.innerHTML = recordedLog
+        ? `<span>${day}</span><small>${shortLabels[recordedLog.work_type] || ''}</small>`
+        : `<span>${day}</span>`;
       button.addEventListener('click', async () => {
         selectedDate = dateValue;
         calendarDate = parseDate(selectedDate);
@@ -112,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateSummary(data) {
+    monthLogs = new Map(data.logs.map((log) => [log.work_date, log]));
     document.querySelector('#month-total').textContent = Number(data.summary.total_value).toFixed(1);
     document.querySelector('#month-records').textContent = data.summary.record_count;
     document.querySelector('#month-full').textContent = data.summary.full_day;
