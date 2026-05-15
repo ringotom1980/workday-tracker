@@ -1,0 +1,24 @@
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+.page-title {
+  font-size: var(--text-xxl);
+  font-weight: 800;
+}
+
+.section-title {
+  font-size: var(--text-xl);
+  font-weight: 750;
+}
+
+.text-muted {
+  color: var(--color-muted);
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+}
