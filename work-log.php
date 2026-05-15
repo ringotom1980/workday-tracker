@@ -57,7 +57,7 @@ include __DIR__ . '/includes/layout/app-shell-start.php';
     <div class="card-body">
       <div class="summary-grid">
         <div class="summary-item">
-          <span class="text-muted">&#32000;&#37636;&#31558;&#25976;</span>
+          <span class="text-muted">&#32000;&#37636;&#25976;</span>
           <strong class="number" id="month-records">0</strong>
         </div>
         <div class="summary-item">

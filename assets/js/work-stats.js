@@ -63,12 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const badges = [];
       if (log) {
         badges.push(`<span class="calendar-chip calendar-chip-work">${workLabels[log.work_type] || ''}</span>`);
-      }
-      if (Number(calendarDay?.is_holiday) === 1) {
-        badges.push('<span class="calendar-chip calendar-chip-holiday">\u4f11</span>');
-      }
-      if (Number(calendarDay?.is_makeup_workday) === 1) {
-        badges.push('<span class="calendar-chip calendar-chip-makeup">\u88dc</span>');
+      } else {
+        if (Number(calendarDay?.is_holiday) === 1) {
+          badges.push('<span class="calendar-chip calendar-chip-holiday">\u4f11</span>');
+        }
+        if (Number(calendarDay?.is_makeup_workday) === 1) {
+          badges.push('<span class="calendar-chip calendar-chip-makeup">\u88dc</span>');
+        }
       }
 
       cell.innerHTML = `

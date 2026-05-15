@@ -198,6 +198,10 @@
   background: rgba(255,77,109,.08);
 }
 
+.stats-calendar-day.is-holiday small {
+  color: var(--color-danger);
+}
+
 .stats-calendar-day.is-makeup {
   background: rgba(255,176,32,.08);
 }
