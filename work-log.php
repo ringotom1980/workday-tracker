@@ -14,7 +14,7 @@ include __DIR__ . '/includes/layout/app-shell-start.php';
   <div class="card card-glow">
     <div class="card-header">
       <div>
-        <p class="text-muted">&#36984;&#23450;&#26085;&#26399;</p>
+        <p class="text-muted" id="selected-date-label"></p>
         <h2 class="card-title" id="current-status">&#23578;&#26410;&#32000;&#37636;</h2>
       </div>
       <button class="badge badge-primary date-picker-trigger" id="selected-date-button" type="button" aria-expanded="false" aria-controls="date-picker-panel"></button>

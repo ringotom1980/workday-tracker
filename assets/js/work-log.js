@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.querySelector('.work-log-page');
+  const selectedDateLabel = document.querySelector('#selected-date-label');
   const selectedDateButton = document.querySelector('#selected-date-button');
   const panel = document.querySelector('#date-picker-panel');
   const calendarTitle = document.querySelector('#calendar-title');
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateSelectedDateLabel() {
+    selectedDateLabel.textContent = `\u9078\u5b9a\u65e5\u671f\uff1a${selectedDate}`;
     selectedDateButton.textContent = selectedDate;
   }
 
