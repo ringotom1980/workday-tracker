@@ -1,0 +1,15 @@
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+RewriteEngine On
+# Deny sensitive paths at every depth and dotfiles, including encoded variants after Apache decoding.
+RewriteRule (^|/)(?:includes|database|cron|logs|cache|uploads|vendor)(?:/|$) - [F,END,NC]
+RewriteRule (^|/)\. - [F,END]
+# Public internal rewrites use END; direct decoded runtime requests are denied.
+RewriteRule ^workday-runtime-v1(?:/|$) - [F,END,NC]
+# WORKDAY_NATIVE_RUNTIME=1
+RewriteRule ^workday-deployment\.json$ workday-runtime-v1/deployment-marker.json [END]
+RewriteRule ^$ workday-runtime-v1/index.php [END]
+RewriteRule ^admin/$ workday-runtime-v1/admin/index.php [END]
+RewriteRule ^(?:|admin/index\.php|admin/users\.php|api/admin/dashboard\.php|api/admin/users\.php|api/auth\.php|api/calendar\.php|api/leaderboard\.php|api/profile\.php|api/register\.php|api/salary\.php|api/work\-logs\.php|api/work\-stats\.php|assets/css/01\-tokens\.css|assets/css/02\-reset\.css|assets/css/03\-typography\.css|assets/css/04\-layout\.css|assets/css/05\-components\.css|assets/css/06\-animations\.css|assets/css/07\-utilities\.css|assets/css/08\-pages\.css|assets/js/admin\-dashboard\.js|assets/js/admin\-users\.js|assets/js/api\.js|assets/js/app\.js|assets/js/date\.js|assets/js/form\.js|assets/js/leaderboard\.js|assets/js/login\.js|assets/js/profile\.js|assets/js/register\.js|assets/js/salary\-bonus\.js|assets/js/storage\.js|assets/js/ui\.js|assets/js/work\-log\.js|assets/js/work\-stats\.js|index\.php|leaderboard\.php|login\.php|profile\.php|register\.php|salary\-bonus\.php|work\-log\.php|work\-stats\.php|admin/)$ workday-runtime-v1/$0 [END]
+RewriteRule ^(?:admin|api)(?:/|$).*\.php(?:/|$) - [F,END,NC]
+RewriteRule ^.*\.php(?:/|$) - [F,END,NC]

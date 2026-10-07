@@ -1,0 +1,28 @@
+name: Workday native artifact
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: workday-native-artifact
+  cancel-in-progress: false
+jobs:
+  artifact:
+    # Approval gate: remains disabled until explicitly approved and enabled.
+    if: vars.WORKDAY_NATIVE_DEPLOY_ENABLED == 'true' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Build
+        run: python3 deployment/build.py "$RUNNER_TEMP/workday-artifact" --source "$GITHUB_SHA"
+      - name: Publish FF artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+          REPOSITORY: ${{ github.repository }}
+          ARTIFACT_DIR: ${{ runner.temp }}/workday-artifact
+        run: bash deployment/publish.sh

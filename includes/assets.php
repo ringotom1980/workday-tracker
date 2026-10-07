@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 function asset_version(string $path): int
 {
-    $documentRoot = rtrim((string) ($_SERVER['DOCUMENT_ROOT'] ?? dirname(__DIR__)), DIRECTORY_SEPARATOR);
+    $documentRoot = rtrim(dirname(__DIR__), DIRECTORY_SEPARATOR);
     $fullPath = $documentRoot . str_replace('/', DIRECTORY_SEPARATOR, $path);
 
     if (file_exists($fullPath)) {
