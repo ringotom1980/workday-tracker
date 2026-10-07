@@ -1,4 +1,5 @@
 <?php
+// Native Git automatic deployment verification: second release.
 
 require_once __DIR__ . '/includes/auth.php';
 
