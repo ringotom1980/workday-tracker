@@ -1,12 +1,18 @@
 Options -Indexes -MultiViews
 DirectoryIndex index.php
 RewriteEngine On
-# Deny sensitive paths at every depth and dotfiles, including encoded variants after Apache decoding.
+# Operator changes only this value: 0 = original root app, 1 = isolated runtime.
+RewriteRule ^ - [E=WORKDAY_NATIVE_RUNTIME:0]
+# ACME HTTP-01 token only. Other .well-known and dot paths remain denied.
+RewriteRule ^\.well-known/acme-challenge/[A-Za-z0-9_-]+$ - [END]
+# PHP includes are filesystem dependencies, never public HTTP endpoints.
 RewriteRule (^|/)(?:includes|database|cron|logs|cache|uploads|vendor)(?:/|$) - [F,END,NC]
 RewriteRule (^|/)\. - [F,END]
-# Public internal rewrites use END; direct decoded runtime requests are denied.
+# END on public rewrites prevents an internal request being denied here.
 RewriteRule ^workday-runtime-v1(?:/|$) - [F,END,NC]
-# WORKDAY_NATIVE_RUNTIME=1
+# Stage 0 leaves the original public application routing unchanged.
+RewriteCond %{ENV:WORKDAY_NATIVE_RUNTIME} !^1$
+RewriteRule ^ - [END]
 RewriteRule ^workday-deployment\.json$ workday-runtime-v1/deployment-marker.json [END]
 RewriteRule ^$ workday-runtime-v1/index.php [END]
 RewriteRule ^admin/$ workday-runtime-v1/admin/index.php [END]

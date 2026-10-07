@@ -1,9 +1,0 @@
-Options -Indexes -MultiViews
-DirectoryIndex index.php
-RewriteEngine On
-# Deny sensitive paths at every depth and dotfiles, including encoded variants after Apache decoding.
-RewriteRule (^|/)(?:includes|database|cron|logs|cache|uploads|vendor)(?:/|$) - [F,END,NC]
-RewriteRule (^|/)\. - [F,END]
-# Public internal rewrites use END; direct decoded runtime requests are denied.
-RewriteRule ^workday-runtime-v1(?:/|$) - [F,END,NC]
-# WORKDAY_NATIVE_RUNTIME=0
